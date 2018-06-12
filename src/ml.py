@@ -9,13 +9,9 @@ import pandas as pd
 import tensorflow as tf
 import plotly
 import plotly.graph_objs as go
-from skimage.io import imread
 from sklearn.utils import shuffle
-from utilities import create_validation_set, transform_images, create_train_set
+from utilities import create_validation_set, transform_images, create_train_set, read_img
 from dl_layers import hiddenLayer, convolutionalLayer, convPoolLayer
-
-# create the validation set
-# create_validation_set(n_val_per_device=75)
 
 class convolutionalNeuralNetwork(object):
     def __init__(self, layers, activation_fn):
@@ -135,8 +131,7 @@ class convolutionalNeuralNetwork(object):
 
                 # create the batch
                 print("Creating batch data %d." % j)
-                #x_batch = transform_images([imread(fname) / 255 if not ("Sony-NEX-7" in fname) else imread(fname)[0] / 255 for fname in dt["file_path"]])
-                x_batch = [imread(fname) / 255 if not ("Sony-NEX-7" in fname) else imread(fname)[0] / 255 for fname in dt["file_path"]]
+                x_batch = [read_img(file_path) / 255 for file_path in dt["file_path"]]
                 ratio = len(x_batch) // dt.shape[0]
                 y_batch = []
                 for c in dt["class"]:
@@ -199,12 +194,11 @@ class convolutionalNeuralNetwork(object):
         else:
             plotly.offline.plot(figure)
 
-
-# import the csv file containing the paths of the training set examples
-dt = pd.read_csv("./data/train_data_classes.csv")
+# create the validation set
+# create_validation_set(n_val_per_device=75, folder_name="validation_1")
 
 # create train set
-create_train_set(dt)
+create_train_set(n_crops=3, folder_name="train_aug_2")
 
 # define the NN
 # conv_net = convolutionalNeuralNetwork(
