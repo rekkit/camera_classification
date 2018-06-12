@@ -10,7 +10,7 @@ import tensorflow as tf
 import plotly
 import plotly.graph_objs as go
 from sklearn.utils import shuffle
-from utilities import create_validation_set, transform_images, create_train_set, read_img
+from utilities import create_train_set, create_validation_set, transform_images, read_img
 from dl_layers import hiddenLayer, convolutionalLayer, convPoolLayer
 
 class convolutionalNeuralNetwork(object):
@@ -32,7 +32,7 @@ class convolutionalNeuralNetwork(object):
 
             # create a fully connected layer to output class probabilities
             self.layers[-1].initialize(
-                n_in=img_w * img_h,
+                n_in=img_w * img_h * self.layers[-2].fm_out,
                 layer_id=i+1,
                 activation_fn=self.activation_fn
             )
@@ -102,10 +102,13 @@ class convolutionalNeuralNetwork(object):
     def setSession(self, session):
         self.session = session
 
-    def fit(self, x, img_w, img_h, n_channels, session, n_epochs, batch_size=20, print_step=20, show_fig=True,
+    def fit(self, x, y, img_w, img_h, n_channels, session, n_epochs, batch_size=20, print_step=20, show_fig=True,
             output_fig=False):
         # set the session to be used
         self.setSession(session)
+        
+        # one-hot encode the target variable
+        #y = tf.one_hot(y, depth=self.n_classes)
 
         # initialize layers using the previously calculated value
         self.initializeLayers(img_w=img_w, img_h=img_h, fm_in=n_channels)
@@ -123,22 +126,15 @@ class convolutionalNeuralNetwork(object):
         self.costs = []
         self.accuracy = []
 
+        # set the number of steps per epoch
+        n_steps = x.shape[0] // batch_size
+
         for i in range(n_epochs):
-            x = shuffle(x).reset_index(drop=True)
+            x, y = shuffle(x, y)
 
-            for j in range(x.shape[0] // batch_size):
-                dt = x.loc[j * batch_size: (j+1) * batch_size]
-
-                # create the batch
-                print("Creating batch data %d." % j)
-                x_batch = [read_img(file_path) / 255 for file_path in dt["file_path"]]
-                ratio = len(x_batch) // dt.shape[0]
-                y_batch = []
-                for c in dt["class"]:
-                    y_batch += ([c] * ratio)
-                print("Created batch data.")
-                print(x_batch)
-                print(y_batch)
+            for j in range(n_steps):
+                x_batch = x[j*batch_size: (j+1)*batch_size, ]
+                y_batch = y[j*batch_size: (j+1)*batch_size]
 
                 # perform cost minimization step
                 self.session.run(
@@ -195,21 +191,52 @@ class convolutionalNeuralNetwork(object):
             plotly.offline.plot(figure)
 
 # create the validation set
-# create_validation_set(n_val_per_device=75, folder_name="validation_1")
+# create_validation_set(n_validation_files=75, folder_name="validation_1")
 
 # create train set
-create_train_set(n_crops=3, folder_name="train_aug_2")
+# create_train_set(n_crops=3, folder_name="train_aug_1")
+
+# read the training_data
+train = []
+train_y = []
+data_path = "C:/Repos/camera_classification/data/train_aug/"
+
+for k, folder in enumerate(os.listdir(data_path)):
+    for file_name in os.listdir(data_path + folder):
+        if "_unalt_0" in file_name:
+            train.append(
+                read_img(data_path + "%s/%s" % (folder, file_name)) / 255
+            )
+
+            train_y.append(k)
+
+# create matrix from data
+dt_train = np.reshape(train, [len(train), 512, 512, 3])
+del train
 
 # define the NN
-# conv_net = convolutionalNeuralNetwork(
-#     layers=[
-#         convolutionalLayer(7, 7, 64),
-#         convolutionalLayer(7, 7, 64),
-#         convPoolLayer(7, 7, 32, [1, 2, 2, 1], [1, 2, 2, 1]),
-#         hiddenLayer(10)
-#     ],
-#     activation_fn=tf.nn.relu
-# )
+conv_net = convolutionalNeuralNetwork(
+    layers=[
+        convolutionalLayer(7, 7, 64),
+        convPoolLayer(7, 7, 32, [1, 2, 2, 1], [1, 2, 2, 1]),
+        hiddenLayer(10)
+    ],
+    activation_fn=tf.nn.relu
+)
 
 # fit the NN
-# conv_net.fit(x=dt, img_w=512, img_h=512, n_channels=3, session=tf.Session(), n_epochs=1)
+conv_net.fit(x=dt_train, y=train_y, img_w=512, img_h=512, n_channels=3, session=tf.Session(), n_epochs=10, batch_size=20)
+
+# conv_net.session.run(
+#     tf.shape(
+#         conv_net.layers[1].forward(
+#             conv_net.layers[0].forward(conv_net.tfX)
+#         )
+#     ),
+#     feed_dict={conv_net.tfX: dt_train[:20, ]}
+# )
+#
+# conv_net.session.run(
+#     conv_net.layers[1].output_size(img_w=512, img_h=512),
+#     feed_dict={conv_net.tfX: dt_train[:20, ]}
+# )

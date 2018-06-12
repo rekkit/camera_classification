@@ -116,4 +116,4 @@ class convPoolLayer(convolutionalLayer):
             )
 
         def output_size(self, img_w, img_h):
-            return int((img_w - self.ksize[1]) / self.strides[1] + 1), int((img_h - self.ksize[2]) / self.strides[2])
+            return int((img_w - self.ksize[1]) / self.strides[1] + 1), int((img_h - self.ksize[2]) / self.strides[2] + 1)
