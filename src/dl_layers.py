@@ -31,7 +31,7 @@ class hiddenLayer(object):
             )
 
             self.b = tf.Variable(
-                np.zeros(self.n_out, dtype=np.float32),
+                np.ones(self.n_out, dtype=np.float32),
                 name="b_%d" % self.layer_id
             )
 
@@ -83,7 +83,7 @@ class convolutionalLayer(object):
             )
 
             self.b = tf.Variable(
-                np.zeros(shape=self.fm_out, dtype=np.float32),
+                np.ones(shape=self.fm_out, dtype=np.float32),
                 name="b_%d" % self.layer_id
             )
 

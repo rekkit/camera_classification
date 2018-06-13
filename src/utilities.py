@@ -8,7 +8,7 @@ from skimage.exposure import adjust_gamma
 from skimage.transform import resize, rotate
 
 
-def create_validation_set(n_validation_files=75, flip_original=False, folder_name=None):
+def create_validation_set(validation_file_paths, flip_original=False, folder_name=None):
     """
     This method randomly picks n_val_per_device train samples for each of the devices and creates validation samples for them.
     :param n_validation_files: The number of validation originals we want for each of the devices.
@@ -16,7 +16,7 @@ def create_validation_set(n_validation_files=75, flip_original=False, folder_nam
     """
 
     # get the test / validation split
-    _, validation_files = train_validation_split(n_validation_files=n_validation_files)
+    validation_files = validation_file_paths.copy()
 
     # create the output folders
     for directory in validation_files.folder_path.unique():
@@ -50,9 +50,9 @@ def create_validation_set(n_validation_files=75, flip_original=False, folder_nam
                 pick_transformation(x_flip, np.random.randint(0, 7 + 1), folder_out_path + file_name_prefix + "flip_manip.jpg", crop_random=False)
 
 
-def create_train_set(n_crops=3, flip_original=True, folder_name="train_augmented"):
+def create_train_set(train_file_paths, n_crops=3, flip_original=True, folder_name="train_augmented"):
     # get the training paths
-    dt, _ = train_validation_split(n_validation_files=75)
+    dt = train_file_paths.copy()
 
     for directory in dt.folder_path.unique():
         directory = directory.replace("train", folder_name)
