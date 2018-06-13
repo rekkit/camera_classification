@@ -1,17 +1,12 @@
 import os
-import sys
-# add the subfolder src to the system path
-sys.path.append(os.getcwd().replace("\\", "/") + "/src")
-
-# other imports
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 import plotly
 import plotly.graph_objs as go
 from sklearn.utils import shuffle
-from utilities import create_train_set, create_validation_set, transform_images, read_img
-from dl_layers import hiddenLayer, convolutionalLayer, convPoolLayer
+from src.utilities import create_train_set, create_validation_set, transform_images, read_img
+from src.dl_layers import hiddenLayer, convolutionalLayer, convPoolLayer
 
 class convolutionalNeuralNetwork(object):
     def __init__(self, layers, activation_fn):
@@ -242,7 +237,7 @@ create_train_set(train_file_paths=train_file_paths, n_crops=3, folder_name="trai
 # read the training_data
 x_paths = []
 y_train = []
-train_path = os.getcwd() + "/data/train_aug/"
+train_path = os.getcwd().replace("\\", "/") + "/data/train_aug/"
 
 for k, folder in enumerate(os.listdir(train_path)):
     for file_name in os.listdir(train_path + folder):
