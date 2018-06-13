@@ -233,7 +233,9 @@ def resize_image(x, factor, crop_random, img_h=512, img_w=512):
     resized_w = int(x.shape[1] * factor)
 
     if resized_h < img_h or resized_w < img_w:
-        raise ValueError("Can not resize image by given factor and still return an image of size %dx%d." % (img_h, img_w))
+        print("Can not resize image by given factor and still return an image of size %dx%d." % (img_h, img_w))
+        # return randomly cropped image
+        return random_crop(x, img_h=img_h, img_w=img_w)
 
     # if the factor is reasonable, resize the image
     x = resize(x, output_shape=(resized_h, resized_w), order=3, mode="constant")
