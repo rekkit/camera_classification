@@ -1,3 +1,13 @@
 # Folders to ignore
 .idea/
 data/*
+images/*
+submissions/*
+models/*
+documents/*
+
+# things inside the folders not to ignore
+!data/flickr_images/
+!data/missing_flickr_image.jpg
+!models/model_6/incv3_03_1.88.hdf5
+
