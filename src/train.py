@@ -52,12 +52,12 @@ params = {
 
 # create the data generators
 training_generator = create_data_generator(
-    data_directory="./data/train_aug_0/",
+    data_directory="./data/train/",
     **params
 )
 
 validation_generator = create_data_generator(
-    data_directory="./data/validation_m/",
+    data_directory="./data/validation/",
     **params
 )
 
